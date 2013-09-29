@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>Ресурсы</title>
+	<link href="browser.css" type="text/css" rel="stylesheet">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<script type="text/javascript" src="js/common.js"></script>
+	<script type="text/javascript">
+
+var oListManager = new Object() ;
+
+//**** Patch to integrate FCK FileManager with CKEDITOR ******
+
+function GetUrlParam( paramName )
+{
+	var oRegex = new RegExp( '[\?&]' + paramName + '=([^&]+)', 'i' ) ;
+	var oMatch = oRegex.exec( window.top.location.search ) ;
+
+	if ( oMatch && oMatch.length > 1 )
+		return decodeURIComponent( oMatch[1] ) ;
+	else
+		return '' ;
+}
+
+oListManager.Clear = function()
+{
+	document.body.innerHTML = '' ;
+}
+
+function ProtectPath(path)
+{
+	path = path.replace( /\\/g, '\\\\') ;
+	path = path.replace( /'/g, '\\\'') ;
+	return path ;
+}
+
+oListManager.GetFolderRowHtml = function( folderName, folderPath, folderSize, color )
+{
+	// Build the link to view the folder.
+	var dLink = '<a href="#" onClick="DelFolder(\''+ProtectPath(folderName)+'\');return false;">';
+
+	if (bThumbMode) {
+		var sLink1 = '<a href="#" style="width: '+Config.ThumbListSize+'px; height: '+Config.ThumbListSize+'px;" class="folder" '+
+			'onclick="OpenFolder(\'' + ProtectPath( folderPath ) + '\');return false;">' ;
+		var sLink2 = '<a href="#" style="width: '+Config.ThumbListSize+'px;" '+
+			'onclick="OpenFolder(\'' + ProtectPath( folderPath ) + '\');return false;">' ;
+		return '<div class="thumbList">' +
+			(Config.Delete ? '<div class="delete">'+dLink+'<img src="images/spacer.gif" width="16" height="16" alt="" title="Удалить"/></a></div>' : '' ) + 
+			sLink1 + '</a>' +
+			'<div class="name" style="width: '+Config.ThumbListSize+'px;">' + folderSize + sLink2 + thumbName(folderName) + '</a></div>' +
+			'</div>';
+	} else {
+		var sLink = '<a href="#" onclick="OpenFolder(\'' + ProtectPath( folderPath ) + '\');return false;">' ;
+		return '<tr style="background: '+color+'">' +
+			'<td width="16">' +	sLink + '<img alt="" src="images/f16.png" width="16" height="16" border="0"><\/a><\/td>' +
+			'<td width="100%">&nbsp;' + sLink + folderName + '<\/a><\/td>' +
+			'<td align="right" nowrap>' + folderSize + '<\/td>' +
+			(Config.Delete ? '<td width="16"><div class="delete">' + dLink + '<img src="images/spacer" border="0" width="16" height="16" alt="" title="Удалить"></a></div></td>' : '' ) +
+			'<\/tr>' ;
+	}
+}
+
+oListManager.GetFileRowHtml = function( fileName, fileUrl, fileSize, color, fileWidth, fileHeight, thumb )
+{
+	// Build the link to view the folder.
+	var sLink = '<a href="#" onclick="OpenFile(\'' + ProtectPath( fileUrl ) + '\');return false;">' ;
+	var dLink = '<a href="#" onClick="DelFile(\''+ProtectPath(fileName)+'\');return false;">';
+	
+	// Get the file icon.
+	var sIcon = oIcons.GetIcon( fileName ) ;
+		
+	if (bThumbMode) {
+		var sLink1 = '<a href="#" class="file" style="width: '+Config.ThumbListSize+'px; height: '+Config.ThumbListSize+'px;" '+
+			'onclick="OpenFile(\'' + ProtectPath( fileUrl ) + '\');return false;">' ;
+		var sLink2 = '<a href="#" style="width: '+Config.ThumbListSize+'px;" '+
+			'onclick="OpenFile(\'' + ProtectPath( fileUrl ) + '\');return false;">' ;
+		if (thumb=='X') {
+			var thumbHeight = 32;
+			var thumbSrc = 'images/icons/32/'+sIcon+'.png';
+		} else {
+			var thumbHeight = fileHeight*1<=Config.ThumbListSize*1 ? fileHeight : (fileWidth*1<=fileHeight*1 ? Config.ThumbListSize : fileHeight*(Config.ThumbListSize/fileWidth));
+			var thumbSrc = thumb;
+		}
+		var sTop = Math.floor((Config.ThumbListSize - thumbHeight) / 2);
+		return '<div class="thumbList">' +
+				(Config.Delete ? '<div class="delete">'+dLink+'<img src="images/spacer.gif" width="16" height="16" alt="" title="Удалить" /></a></div>' : '' ) + 
+				sLink1 + '<img style="margin-top: '+sTop+'px" src="'+thumbSrc+'" alt=""/></a>' + 
+				'<div class="name" style="width: '+Config.ThumbListSize+'px;">' + 
+					( (fileWidth && fileHeight) ? fileWidth + '&times;' + fileHeight + ' ': '' ) + '(' + fileSize + ')<br/>' +
+					sLink2 + thumbName(fileName) + '</a>' +
+				'</div>' + 
+			'</div>';
+	} else {
+		return '<tr style="background: '+color+'">' +
+			'<td width="16">' + sLink + '<img alt="" src="images/icons/16/' + sIcon + '.png" width="16" height="16" border="0"><\/a><\/td>' +
+			'<td width="100%">&nbsp;' + sLink + fileName + '<\/a><\/td>' +
+			'<td align="right" nowrap>' + fileSize + '<\/td>' +
+			(Config.Delete ? '<td width="16"><div class="delete">' + dLink + '<img src="images/spacer.gif" border="0" width="16" height="16" alt="" title="Удалить" \/><\/a><\/div><\/td>' : '' ) +
+			'<\/tr>' ;
+	}
+}
+
+function thumbName(str) {
+	var step = Math.ceil(Config.ThumbListSize / 7);
+	var len = str.length;
+	var ret = '';
+	var i = 0;
+	while(i<len) {
+//		ret += str.substr(i, step) + '</br/>';
+		ret += str.substr(i, step);
+		i += step;
+	}
+	return ret;
+}
+
+function OpenFolder( folderPath )
+{
+	// Load the resources list for this folder.
+	window.parent.frames['frmFolders'].LoadFolders( folderPath ) ;
+}
+
+function OpenFile( fileUrl )
+{
+	//PATCH: Using CKEditors API we set the file in preview window.	
+	funcNum = GetUrlParam('CKEditorFuncNum') ;	
+	
+	//fixed the issue: images are not displayed in preview window when filename contain spaces due encodeURI encoding already encoded fileUrl
+	window.top.opener.CKEDITOR.tools.callFunction( funcNum, fileUrl);
+//	window.top.opener.SetUrl( encodeURI( fileUrl ).replace( '#', '%23' ) ) ;
+	
+	window.top.close() ;
+	window.top.opener.focus() ;
+}
+
+function DelFolder( folderName )
+{
+	if (confirm('Подтвердите удаление папки \''+folderName+'\' и её содержимого')==false) return;
+	oListManager.Clear() ;
+	oConnector.SendCommand( 'FolderDelete', 'DelFolder='+encodeURIComponent(folderName), DelCallback ) ;
+}
+
+function DelFile( fileName )
+{
+	if (confirm('Подтвердите удаление \''+fileName+'\'')==false) return;
+	oListManager.Clear() ;
+	oConnector.SendCommand( 'FileDelete', 'DelFile='+encodeURIComponent(fileName), DelCallback ) ;
+}
+
+function DelCallback( fckXml ) {
+	if ( oConnector.CheckError( fckXml ) != 0 )
+		return ;
+	window.Refresh();
+}
+
+function LoadResources( resourceType, folderPath )
+{
+	oListManager.Clear() ;
+	oConnector.ResourceType = resourceType ;
+	oConnector.CurrentFolder = folderPath ;
+	bThumbMode = oConnector.ResourceType=='Image' && Config.ThumbList;
+	oConnector.SendCommand( 'GetFoldersAndFiles', null, GetFoldersAndFilesCallBack ) ;
+}
+
+function Refresh()
+{
+	LoadResources( oConnector.ResourceType, oConnector.CurrentFolder ) ;
+}
+
+function GetFoldersAndFilesCallBack( fckXml )
+{
+	if ( oConnector.CheckError( fckXml ) != 0 )
+		return ;
+
+	// Get the current folder path.
+	var oFolderNode = fckXml.SelectSingleNode( 'Connector/CurrentFolder' ) ;
+	if ( oFolderNode == null )
+	{
+		alert( 'Сервер не отвечает на Ваши XML данные. Пожалуйста проверьте конфигурацию.' ) ;
+		return ;
+	}
+	var sCurrentFolderPath	= oFolderNode.attributes.getNamedItem('path').value ;
+	var sCurrentFolderUrl	= oFolderNode.attributes.getNamedItem('url').value ;
+
+//	var dTimer = new Date() ;
+
+	if (bThumbMode)
+		var oHtml = new StringBuilder('');
+	else
+		var oHtml = new StringBuilder( '<table id="tableFiles" cellspacing="0" cellpadding="3" width="100%" border="0">' ) ;
+	var colors = new Array('#E2EFFF','#D5EAFF');
+	var color_index = 0;
+
+	// Add the Folders.
+	var oNodes ;
+	oNodes = fckXml.SelectNodes( 'Connector/Folders/Folder' ) ;
+	for ( var i = 0 ; i < oNodes.length ; i++ )
+	{
+		var sFolderName = oNodes[i].attributes.getNamedItem('name').value ;
+		var sFolderSize = oNodes[i].attributes.getNamedItem('size').value ;
+		
+		oHtml.Append( oListManager.GetFolderRowHtml( sFolderName, sCurrentFolderPath + sFolderName + "/", sFolderSize , colors[color_index] ) ) ;
+		color_index = 1 - color_index;
+	}
+
+	// Add the Files.
+	oNodes = fckXml.SelectNodes( 'Connector/Files/File' ) ;
+	for ( var j = 0 ; j < oNodes.length ; j++ )
+	{
+		var oNode = oNodes[j] ;
+		var sFileName = oNode.attributes.getNamedItem('name').value ;
+		var sFileSize = oNode.attributes.getNamedItem('size').value ;
+		var sFileSize = oNode.attributes.getNamedItem('size').value ;
+		if (bThumbMode) {
+			var iFileWidth = oNode.attributes.getNamedItem('width').value ;
+			var iFileHeight = oNode.attributes.getNamedItem('height').value ;
+			var sFileThumb = Config.ThumbList ? oNode.attributes.getNamedItem('thumb').value : '';
+		} else {
+			var iFileWidth = 0;
+			var iFileHeight = 0;
+			var sFileThumb = '';
+		}
+
+		// Get the optional "url" attribute. If not available, build the url.
+		var oFileUrlAtt = oNodes[j].attributes.getNamedItem('url') ;
+		var sFileUrl = oFileUrlAtt != null ? oFileUrlAtt.value : sCurrentFolderUrl + sFileName ;
+//		var sFileUrl = oFileUrlAtt != null ? oFileUrlAtt.value : encodeURI( sCurrentFolderUrl + sFileName ).replace( /#/g, '%23' ) ;
+
+		oHtml.Append( oListManager.GetFileRowHtml( sFileName, sFileUrl, sFileSize, colors[color_index], iFileWidth, iFileHeight, sFileThumb ) ) ;
+		color_index = 1 - color_index;
+	}
+
+	if (bThumbMode)
+		oHtml.Append( '' ) ;
+	else
+		oHtml.Append( '<\/table>' ) ;
+
+	document.body.innerHTML = oHtml.ToString() ;
+
+//	window.top.document.title = 'Finished processing in ' + ( ( ( new Date() ) - dTimer ) / 1000 ) + ' seconds' ;
+
+}
+
+window.onload = function()
+{
+	window.top.IsLoadedResourcesList = true ;
+	Config = window.top.Config;
+}
+	</script>
+</head>
+<body class="FileArea">
+</body>
+</html>

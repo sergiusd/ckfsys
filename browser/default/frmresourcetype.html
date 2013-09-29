@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<title>Допустимые типы</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link href="browser.css" type="text/css" rel="stylesheet">
+		<script type="text/javascript" src="js/common.js"></script>
+		<script type="text/javascript">
+
+function SetResourceType( type )
+{
+	window.parent.frames["frmFolders"].SetResourceType( type ) ;
+	window.parent.frames["frmUpload"].SetThumb( type );
+}
+
+var aTypes = [
+	['File','File'],
+	['Image','Image'],
+	['Flash','Flash'],
+	['Media','Media']
+] ;
+
+window.onload = function()
+{
+	var oCombo = document.getElementById('cmbType') ;
+	oCombo.innerHTML = '' ;
+	for ( var i = 0 ; i < aTypes.length ; i++ )
+	{
+		if ( oConnector.ShowAllTypes || aTypes[i][0] == oConnector.ResourceType )
+			AddSelectOption( oCombo, aTypes[i][1], aTypes[i][0] ) ;
+	}
+}
+
+		</script>
+	</head>
+	<body>
+		<div class="iblock" style="margin:5px 0;padding:2px 8px;">
+			Типы ресурсов<br>
+			<select id="cmbType" onchange="SetResourceType(this.value);">
+				<option>&nbsp;
+			</select>
+		</div>
+	</body>
+</html>

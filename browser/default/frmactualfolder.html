@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<title>Путь к папке</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link href="browser.css" type="text/css" rel="stylesheet">
+		<script type="text/javascript">
+// Automatically detect the correct document.domain (#1919).
+(function()
+{
+	var d = document.domain ;
+
+	while ( true )
+	{
+		// Test if we can access a parent property.
+		try
+		{
+			var test = window.top.opener.document.domain ;
+			break ;
+		}
+		catch( e )
+		{}
+
+		// Remove a domain part: www.mytest.example.com => mytest.example.com => example.com ...
+		d = d.replace( /.*?(?:\.|$)/, '' ) ;
+
+		if ( d.length == 0 )
+			break ;		// It was not able to detect the domain.
+
+		try
+		{
+			document.domain = d ;
+		}
+		catch (e)
+		{
+			break ;
+		}
+	}
+})() ;
+
+function SetCurrentFolder( resourceType, folderPath )
+{
+	var f = folderPath.split('/');
+	var f_count = f.length - 1;
+	var txt = '';
+	var path = '/';
+	for(i=1; i<f_count-1; i++) {
+		path += f[i]+'/';
+		txt += ' <a href="#" onClick="OpenFolder(\''+path+'\')">'+f[i]+'</a> /';
+	}
+	var up = f_count!=1 ? '<a href="#" onClick="OpenFolder(\''+path+'\')"><img src="images/fu32.png" width="32" height="32" border="0" style="vertical-align: -11px;"/></a>' : '<img src="images/f32.png" width="32" height="32" border="0" style="vertical-align: -11px;"/>';
+	var root = f_count!=1 ? '<a href="#" onClick="OpenFolder(\'/\')"> '+resourceType+'</a>' : resourceType;
+	if (f_count>1) txt += ' '+f[f_count-1]+' /';
+	document.getElementById('currentFolderPath').innerHTML = up + ' &nbsp; ' +
+		root + ' /' +
+		txt ;
+}
+
+function OpenFolder( folderPath )
+{
+	// Load the resources list for this folder.
+	window.parent.frames['frmFolders'].LoadFolders( folderPath ) ;
+}
+
+window.onload = function()
+{
+	window.top.IsLoadedActualFolder = true ;
+	Config = window.top.Config;
+}
+
+		</script>
+	</head>
+	<body>
+		<div id="currentFolderPath" class="iblock">/</div>
+	</body>
+</html>

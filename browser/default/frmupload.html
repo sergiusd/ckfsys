@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+	<head>
+		<title>Закачка файла</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link href="browser.css" type="text/css" rel="stylesheet" >
+		<link href="jif.css" type="text/css" rel="stylesheet">
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jif.js"></script>
+		<script type="text/javascript" src="js/common.js"></script>
+		<script type="text/javascript">
+function SetCurrentFolder( resourceType, folderPath )
+{
+	var sUrl = oConnector.ConnectorUrl + 'Command=FileUpload' ;
+	sUrl += '&Type=' + resourceType ;
+	sUrl += '&CurrentFolder=' + encodeURIComponent( folderPath ) ;
+
+	document.getElementById('frmUpload').action = sUrl ;
+	SetThumb(resourceType);
+}
+
+function OnSubmit()
+{
+	if ( document.getElementById('NewFile').value.length == 0 )
+	{
+		alert( 'Пожалуйста выберите файл' ) ;
+		return false ;
+	}
+
+	// Set the interface elements.
+	document.getElementById('eUploadMessage').innerHTML = 'Загрузка нового файла в данную папку. Подождите...' ;
+	document.getElementById('btnUpload').disabled = true ;
+
+	return true ;
+}
+
+function OnUploadCompleted( errorNumber, data )
+{
+	//alert(window.parent.frames['frmUploadWorker'].document.body.innerHTML);
+
+	// Reset the Upload Worker Frame.
+	window.parent.frames['frmUploadWorker'].location = 'javascript:void(0)' ;
+
+	// Reset the upload form (On IE we must do a little trick to avoid problems).
+	if ( document.all )
+		document.getElementById('NewFile').outerHTML = '<input id="NewFile" name="NewFile" style="WIDTH: 100%" type="file">' ;
+	else
+		document.getElementById('frmUpload').reset() ;
+
+	// Reset the interface elements.
+	document.getElementById('eUploadMessage').innerHTML = 'Загрузить новый файл в данную папку' ;
+	document.getElementById('btnUpload').disabled = false ;
+
+	switch ( errorNumber )
+	{
+		case 0 :
+			window.parent.frames['frmResourcesList'].Refresh() ;
+			break ;
+		case 1 :	// Custom error.
+			alert( data ) ;
+			break ;
+		case 201 :
+			window.parent.frames['frmResourcesList'].Refresh() ;
+			alert( 'Файл с таким именем уже существует. Закачиваемый файл переименован в "' + data + '"' ) ;
+			break ;
+		case 202 :
+			alert( 'Недопустимый файл' ) ;
+			break ;
+		default :
+			alert( 'Ошибка при закачивании. Ошибка номер: ' + errorNumber ) ;
+			break ;
+	}
+}
+
+function SetThumb(type) {
+        if (Config.ThumbCreate && type == 'Image')
+            document.getElementById('thumb_box').style.display = 'block';
+        else
+            document.getElementById('thumb_box').style.display = 'none';
+}
+
+function kp(evt) {
+        if (evt.keyCode==46 || evt.keyCode==8 || evt.keyCode==37 || evt.keyCode==39 || evt.keyCode==109) return true;
+        if (evt.keyCode<48 || evt.keyCode>57) return false;
+}
+
+function thumbHelp() {
+	var width=420;
+	var height=260;
+	if(screen) {
+		if (width >= screen.width)		width = screen.width;
+		if (height >= screen.height)	height = screen.height;
+		Left=Math.floor((screen.width-width)/2)
+		Top=Math.floor((screen.height-height)/2)
+	} else {
+		Left=0;
+		Top=0;
+	}
+	var popup = window.open('', 'thumb_help', 'left=' + Left + 'px,top=' + Top + 'px,width=' + width + 'px,height=' + height + 'px,scrollbars=1,resizable=1,status=0');
+	popup.document.write(
+		'<head>'+
+		'<title>Изменение размера &mdash; Помощь</title>'+
+		'<head>'+
+		'<body style="margin:6px;padding:8px;color:#003;background:#C6E2FF;font:normal 12px/16px Arial,sans-serif;border:2px solid #69d; border-radius:5px;">'+
+		'<h2 style="margin:-8px -8px 5px -8px;padding:5px;color:#fff;background:#69d;text-align:center;">Изменение размеров изображения</h2>'+
+		'<p>Вы можете сразу при загрузке изменить размер изображения.</p><p>Возможности:</p>'+
+		'<ol>'+
+		'<li>Если задать ширину и высоту, то изображение впишется в эти размеры, сохраняя пропорции.</li>'+
+		'<li>Если один из параметров установить в 0, то этот параметр установится в соответствии с пропорциями.</li>'+
+		'<li>Если хотя бы один параметр отрицательный, то из изображения вырежется кусок максимального размера, в центре изображения и уменьшенный до введенных размеров.</li>'+
+		'</ol>'+
+		'</body>'+
+		'</html>'
+	);
+	popup.focus();
+}
+
+window.onload = function()	{
+	window.top.IsLoadedUpload = true ;
+	Config = window.top.Config;
+}
+		</script>
+	</head>
+	<body>
+		<script type="text/javascript">
+			$(document).ready(function(){$('input:file').jInputFile();});
+		</script>
+		<div class="iblock" style="padding:2px 10px;">
+			<div class="dlblock">
+				<form id="frmUpload" action="" target="frmUploadWorker" method="post" enctype="multipart/form-data" onsubmit="return OnSubmit();">
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td width="1"><img border=0 width="1" height="44" alt=""></td>
+						<td width="100%">
+							<span id="eUploadMessage">Загрузить новый файл в данную папку</span><br>
+							<input id="NewFile" name="NewFile" type="file">
+						</td>
+						<td nowrap style="padding-right:20px;">
+							<div id="thumb_box" style="display:none;">
+								<table border="0" cellspacing="0" cellpadding="0">
+									<tr>
+										<td nowrap><label class="labw" title="Ширина"><input type="text" id="thumb_x" name="thumb_x" value="100" onKeyDown="return kp(event)" style="width:30px"></label></td>
+										<td nowrap colspan="1" rowspan="2"><label class="labth"><input type="checkbox" id="thumb" name="thumb"> изменить
+											<a href="javascript:thumbHelp()"><img class="help" src="images/help.png" border="0" width="16" height="16" alt=""></a></label></td>
+									</tr>
+									<tr>
+										<td nowrap><label class="labh" title="Высота"><input type="text" id="thumb_y" name="thumb_y" value="0" onKeyDown="return kp(event)" style="width:30px"></label></td>
+									</tr>
+								</table>
+							</div>
+						</td>
+						<td nowrap>
+							<button class="sbutton" id="btnUpload" type="submit"><img src="images/dl16.png" border="0" width="16" height="16" alt="">Загрузить</button>
+						</td>
+					</tr>
+				</table>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

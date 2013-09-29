@@ -1,0 +1,53 @@
+.jInputFile-input{
+	position: absolute;
+}
+
+.jInputFile-customFile{
+	position: absolute;
+	width: 220px;
+    margin-left: -140px;
+    cursor: default;
+    height: 21px;
+    z-index: 2;
+	font: 13px Verdana;			/*!!!!!!!!!!!!!!*/
+	filter: alpha(opacity: 0);
+    opacity: 0;
+}
+
+.jInputFile-fakeButton	{
+    position: absolute;
+    z-index: 1;
+    width: 108px;
+    height: 20px;
+    background: url(images/button.png) no-repeat left top;
+    float: left;
+}
+       
+.jInputFile-blocker	{
+    position: absolute;
+    z-index: 3;
+    width: 155px;
+    height: 21px;
+    background: url(images/transparent.gif);
+    margin-left: -155px;
+}
+
+.jInputFile-fileName	{
+    position: absolute;
+    height: 15px;
+	line-height: 15px;
+    margin-left: 130px;
+    font-family: Trebuchet;
+    font-size: 13px;
+    color: gray;
+    margin-top: 2px;
+    padding-top: 1px;
+    padding-left: 19px;
+	background: url(images/icons.png);
+	display: none;
+}
+
+.jInputFile-activeBrowseButton	{
+    background: url(images/button_active.png) no-repeat left top;
+    display: none;
+}
