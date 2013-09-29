@@ -7,7 +7,7 @@
 	<script type="text/javascript" src="js/common.js"></script>
 	<script type="text/javascript">
 
-var oListManager = new Object() ;
+var oListManager = {} ;
 
 //**** Patch to integrate FCK FileManager with CKEDITOR ******
 
@@ -154,11 +154,13 @@ function DelCallback( fckXml ) {
 
 function LoadResources( resourceType, folderPath )
 {
+	folderPath = oStore.getFolderPath( resourceType, folderPath, true );
 	oListManager.Clear() ;
 	oConnector.ResourceType = resourceType ;
 	oConnector.CurrentFolder = folderPath ;
 	bThumbMode = oConnector.ResourceType=='Image' && Config.ThumbList;
 	oConnector.SendCommand( 'GetFoldersAndFiles', null, GetFoldersAndFilesCallBack ) ;
+	oStore.setFolderPath( resourceType, folderPath );
 }
 
 function Refresh()

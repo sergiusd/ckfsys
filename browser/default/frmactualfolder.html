@@ -4,6 +4,7 @@
 		<title>Путь к папке</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="browser.css" type="text/css" rel="stylesheet">
+		<script type="text/javascript" src="js/common.js"></script>
 		<script type="text/javascript">
 // Automatically detect the correct document.domain (#1919).
 (function()
@@ -40,6 +41,7 @@
 
 function SetCurrentFolder( resourceType, folderPath )
 {
+	folderPath = oStore.getFolderPath( resourceType, folderPath );
 	var f = folderPath.split('/');
 	var f_count = f.length - 1;
 	var txt = '';

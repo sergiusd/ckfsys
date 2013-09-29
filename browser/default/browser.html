@@ -5,6 +5,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="browser.css" type="text/css" rel="stylesheet">
 		<script type="text/javascript" src="js/fckxml.js"></script>
+		<script type="text/javascript" src="js/cookie.js"></script>
 		<script type="text/javascript" src="../../connectors/php/config.php?js_conf"></script>
 		<script type="text/javascript">
 		
@@ -52,7 +53,25 @@ function GetUrlParam( paramName )
 		return '' ;
 }
 
-var oConnector = new Object() ;
+var oStore = {
+	firstOpen: true,
+	getFolderPath: function(resourceType, folderPath, dropFirstOpen ) {
+		if( this.firstOpen ) {
+			if ( getCookie(resourceType+'-fPath') ) {
+				folderPath = getCookie(resourceType+'-fPath');
+			}
+			if ( dropFirstOpen !== undefined ) {
+				this.firstOpen = false;
+			}
+		}
+		return folderPath;
+	},
+	setFolderPath: function(resourceType, folderPath) {
+		setCookie(resourceType+'-fPath', folderPath, '');
+	}
+}
+
+var oConnector = {} ;
 oConnector.CurrentFolder	= '/' ;
 
 var sConnUrl = GetUrlParam( 'Connector' ) ;

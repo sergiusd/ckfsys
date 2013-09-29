@@ -45,6 +45,7 @@ function AddSelectOption( selectElement, optionText, optionValue )
 
 var oConnector	= window.parent.oConnector ;
 var oIcons		= window.parent.oIcons ;
+var oStore		= window.parent.oStore ;
 //var bThumbMode = oConnector.ResourceType=='Image' && Config.ThumbList;
 
 
