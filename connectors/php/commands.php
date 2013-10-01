@@ -445,6 +445,9 @@ function filemanager_thumb($IMAGE_SOURCE, $THUMB_X, $THUMB_Y, $IMAGE_OUT='') {
 	    3 => array("r"=>"png", "w"=>"png", "vr"=>"PNG Support", "vw"=>"PNG Support"),
 	    15 => array("r"=>"wbmp", "w"=>"wbmp", "vr"=>"WBMP Support", "vw"=>"WBMP Support")
 	  );
+		if (@PHP_VERSION_ID>=50300) {
+			$img_type[2]=array("r"=>"jpeg", "w"=>"jpeg", "vr"=>"JPEG Support", "vw"=>"JPEG Support");
+		}
 	  if (!$cmd = $img_type[$type]) {
 	  	echo "Thumb - Неизвестный формат - $type ($IMAGE_SOURCE)<br>";
 	  	return false;
