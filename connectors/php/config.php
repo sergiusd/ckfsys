@@ -21,6 +21,7 @@ $Config['ThumbCreate'] = true;  // При закачке можно изменя
 $Config['ThumbList'] = true;    // Показывать превьюшки
 $Config['ThumbListSize'] = 100; // Размер превьюшки, вписывается в квадрат
 $Config['ThumbMaxGenerate'] = 5; // Максимальное количество превьюшек, генерируемое за раз, если вдруг их нет
+$Config['ThumbEnableImagemagick'] = null; // Использовать imagemagick (null = использовать, если удастся обнаружить)
 
 // Path to user files relative to the document root.
 $Config['UserFilesPath'] = '/data/ckfsys2/files/' ;

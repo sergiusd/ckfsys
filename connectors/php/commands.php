@@ -474,6 +474,15 @@ function filemanager_getthumbname($path) {
 	return str_replace('/', '_-_', $path);
 }
 function filemanager_imagemagick_check() {
+  global $Config;
+	if (isset($Config['ThumbEnableImagemagick'])) {
+		return (bool)$Config['ThumbEnableImagemagick'];
+	} else {
+		if (strtoupper(substr(PHP_OS,0,3)) === 'WIN') {
+			// don't run convert on windows unless 'imagemagick' is in path
+      if (strpos(strtolower(getenv('PATH')),'imagemagick') === false) return false;
+		}
+	}
 	return strpos(`convert -version`, 'ImageMagick') !== false ? true : false;
 }
 function filemanager_gd2_check() {
